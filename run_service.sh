@@ -80,13 +80,8 @@ while [[ $# -gt 0 ]]; do
 done
 
 # Run the Python script with the parsed arguments
-echo "Running the Python script with the following arguments: \
-    --port $PORT \
-    --gpu_index $GPU_INDEX \
-    --model_size $MODEL_SIZE \
-    $ONLINE \
-    $ENABLE_CORRECTIONS \
-    $VERBOSE"
+echo "Server will run on --port $PORT --gpu_index $GPU_INDEX --model_size $MODEL_SIZE $ONLINE $ENABLE_CORRECTIONS $VERBOSE"
 
 script_command="bash /workspace/whisper-server/fast_whisper_server.sh"
-docker run --name whisper-service -p $PORT:$PORT --gpus all -dit label/whisper-server:0.0.1 $script_command "--port $PORT --gpu_index $GPU_INDEX --model_size $MODEL_SIZE $ONLINE $ENABLE_CORRECTIONS $VERBOSE"
+start_time=$(date +'%m-%d-%Y-%H-%M-%S')
+docker run --name "whisper-service_$start_time" -p $PORT:$PORT --gpus all -dit label/whisper-server:0.0.1 $script_command "--port $PORT --gpu_index $GPU_INDEX --model_size $MODEL_SIZE $ONLINE $ENABLE_CORRECTIONS $VERBOSE"
