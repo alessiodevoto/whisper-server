@@ -24,6 +24,7 @@ whisper_service_description = './fast_whisper_service_description.md'
 server_crash_log = './server_crashes_log.txt'
 hf_token = '<secret-token-goes-here>'     
 
+
 # Max beam size for each model size.
 max_beam_size = {
     'tiny': 50,
