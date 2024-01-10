@@ -80,7 +80,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 # Run the Python script with the parsed arguments
-echo "Server will run on --port $PORT --gpu_index $GPU_INDEX --model_size $MODEL_SIZE $ONLINE $ENABLE_CORRECTIONS $VERBOSE"
+echo "Service will be up in roughly 30 seconds on --port $PORT --gpu_index $GPU_INDEX --model_size $MODEL_SIZE $ONLINE $ENABLE_CORRECTIONS $VERBOSE"
 
 script_command="bash /workspace/whisper-server/fast_whisper_server.sh"
 start_time=$(date +'%m-%d-%Y-%H-%M-%S')
