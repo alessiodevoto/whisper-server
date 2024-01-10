@@ -11,9 +11,12 @@ RUN apt-get update && \
 
 RUN mkdir -p /workspace/
 WORKDIR /workspace/
+# The paths from where we copy the model and the app are relative 
+# to the directory where the 
+# docker build command is executed.
 COPY ./speech-to-text-app/fast-whisper/ ./fast-whisper
 COPY ./service_workspace/models/ ./models
 
 
 RUN python3 -m pip install --no-cache-dir --upgrade pip && \
-    python3 -m pip install --no-cache-dir -r ./fast-whisper/fast_whisper_reqs.txt 
+    python3 -m pip install --no-cache-dir -r /workspace/fast-whisper/fast_whisper_reqs.txt 

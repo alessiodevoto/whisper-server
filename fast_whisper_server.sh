@@ -59,7 +59,7 @@ last_checksum=$(md5sum "$file_to_monitor")
 
 # Get the command to start the server from the command line arguments
 echo "Starting Whisper server..."
-start_server_command="python3 fast_whisper_app.py $@"
+start_server_command="python3 /workspace/fast-whisper/fast_whisper_app.py $@"
 $start_server_command &
 
 # Main loop

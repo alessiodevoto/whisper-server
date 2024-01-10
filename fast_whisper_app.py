@@ -16,13 +16,16 @@ import datetime
 #####################################################################################################################################
 
 # Paths.
-workspace_dir = Path('/workspace/service_workspace')
+workspace_dir = Path('/workspace')
 default_logs_dir = workspace_dir / 'logs/'
 default_models_dir = workspace_dir / 'models/'
+server_crash_log = workspace_dir / 'server_crashes_log.txt'
+
+app_dir = workspace_dir / 'fast-whisper/'
+whisper_service_description = app_dir / 'fast_whisper_service_description.md'
+
+hf_token = '<secret-token-goes-here>'   
 whisper_path = 'openai/whisper-{whisper_size}'
-whisper_service_description = './fast_whisper_service_description.md'
-server_crash_log = './server_crashes_log.txt'
-hf_token = '<secret-token-goes-here>'     
 
 
 # Max beam size for each model size.
