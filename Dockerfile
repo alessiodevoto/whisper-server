@@ -15,8 +15,8 @@ WORKDIR /workspace/
 # to the directory where the 
 # docker build command is executed.
 RUN touch /workspace/server_crashes_log.txt
-COPY ./speech-to-text-app/fast-whisper/ ./fast-whisper
-COPY ./service_workspace/models/ ./models
+COPY ./whisper-server ./whisper-server
+COPY ./models/ ./models
 
 
 

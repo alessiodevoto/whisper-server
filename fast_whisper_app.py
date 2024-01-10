@@ -21,7 +21,7 @@ default_logs_dir = workspace_dir / 'logs/'
 default_models_dir = workspace_dir / 'models/'
 server_crash_log = workspace_dir / 'server_crashes_log.txt'
 
-app_dir = workspace_dir / 'fast-whisper/'
+app_dir = workspace_dir / 'whisper-server/'
 whisper_service_description = app_dir / 'fast_whisper_service_description.md'
 
 hf_token = '<secret-token-goes-here>'   
