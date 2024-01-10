@@ -1,12 +1,11 @@
 #!/bin/bash
+
 # This script is used to monitor the server for crashes and restart it if necessary
+
+
 server_running=1 
 
-# Set the file to monitor
-# When there is a change in this file, we have to shut down and restart the server
-file_to_monitor="/workspace/server_crashes_log.txt"
-
-# Set the interval for checking changes in seconds
+file_to_monitor="/workspace/server_crashes_log.txt" # we restart the server if this file changes
 check_interval=5
 
 # Function to check for file changes and restart the server if necessary
