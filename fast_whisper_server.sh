@@ -4,7 +4,7 @@ server_running=1
 
 # Set the file to monitor
 # When there is a change in this file, we have to shut down and restart the server
-file_to_monitor="./server_crashes_log.txt"
+file_to_monitor="/workspace/server_crashes_log.txt"
 
 # Set the interval for checking changes in seconds
 check_interval=5
