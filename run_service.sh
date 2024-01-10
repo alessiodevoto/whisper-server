@@ -2,6 +2,7 @@
 
 # This script runs a Docker container with the Whisper server. The parameters of the server can be set by passing
 # command-line arguments to this script. The arguments are then passed to the Python script that runs the server.
+# IMPORTANT: this script assumes the image name is label/whisper-server:0.0.1
 
 # Set default values
 PORT=4020
