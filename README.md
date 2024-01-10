@@ -1,7 +1,9 @@
 ### Whisper Server
 
+Deploy a demo OpenAI Whisper Automatic Speech Recognition via Docker. 
 
-First of all, build the Docker image with 
+
+First of all, make sure you are in a directoy containing this repository and model weights. Then, build the Docker image with 
 
 ```
 docker build -t repo/whisper-server:0.0.1 -f whisper-server/Dockerfile .
