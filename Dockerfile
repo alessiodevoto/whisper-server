@@ -14,8 +14,10 @@ WORKDIR /workspace/
 # The paths from where we copy the model and the app are relative 
 # to the directory where the 
 # docker build command is executed.
+RUN touch /workspace/server_crashes_log.txt
 COPY ./speech-to-text-app/fast-whisper/ ./fast-whisper
 COPY ./service_workspace/models/ ./models
+
 
 
 RUN python3 -m pip install --no-cache-dir --upgrade pip && \
