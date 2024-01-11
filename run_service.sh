@@ -18,12 +18,17 @@ ONLINE=""
 BATCH_SIZE=16
 CHUNK_LEN=30
 HF_TOKEN="hf_token"
+IMAGE_NAME="label/whisper-server:0.0.1"
 
 # Parse command-line arguments
 while [[ $# -gt 0 ]]; do
     case $1 in
         --port)
             PORT=$2
+            shift
+            ;;
+        --image)
+            IMAGE_NAME=$2
             shift
             ;;
         --gpu_index)
@@ -84,4 +89,4 @@ echo "Service will be up in roughly 30 seconds on --port $PORT --gpu_index $GPU_
 
 script_command="bash /workspace/whisper-server/fast_whisper_server.sh"
 start_time=$(date +'%m-%d-%Y-%H-%M-%S')
-docker run --name "whisper-service_$start_time" -p $PORT:$PORT --gpus all -dit label/whisper-server:0.0.1 $script_command "--port $PORT --gpu_index $GPU_INDEX --model_size $MODEL_SIZE $ONLINE $ENABLE_CORRECTIONS $VERBOSE"
+docker run --name "whisper-service_$start_time" -p $PORT:$PORT --gpus all -dit $IMAGE_NAME $script_command "--port $PORT --gpu_index $GPU_INDEX --model_size $MODEL_SIZE $ONLINE $ENABLE_CORRECTIONS $VERBOSE"
