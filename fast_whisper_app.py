@@ -106,7 +106,7 @@ if __name__ == '__main__':
         logger.warning("Unable to read service description. The service will run anyway.")
     
     # wrapper to perform live inference
-    def live_wrapper(audio_inp, state=''):
+    def live_inference_wrapper(audio_inp, state=''):
         """
         Wrapper function for live speech-to-text transcription.
 
@@ -123,7 +123,7 @@ if __name__ == '__main__':
         return state, state
     
     # wrapper to perform async inference
-    def wrapper(
+    def inference_wrapper(
               audio_inp, 
               additional_prompt, 
               language, 
@@ -147,6 +147,8 @@ if __name__ == '__main__':
             Returns:
                 tuple: A tuple containing the transcription, nice timestamps, processing times, and transcription again.
             """
+            # inverse map the repetition penalty to go from 1 to 0.5
+            repetition_penalty = 1 - repetition_penalty * 0.5
             transcription, nice_timestamps, processing_times, transcription = None, None, None, None
             try:
                 transcription, timestamps, processing_times = inference.generate(
@@ -200,7 +202,7 @@ if __name__ == '__main__':
                 additional_prompt = gr.Textbox(visible=not live, label='custom prompt')
                 do_sample = gr.Checkbox(value=True, label='sample')
                 temperature = gr.Slider(minimum=0.1, maximum=2, value=0.1, label='temperature')
-                repetition_penalty = gr.Slider(minimum=0.4, maximum=1.0, value=1.0, label='repetition penalty')
+                repetition_penalty = gr.Slider(minimum=0.0, maximum=1.0, value=1.0, label='repetition penalty')
                 num_beams = gr.Slider(minimum=1, maximum=max_beam_size[args.model_size], step=1, value=1, label='number of beams')
                 clear_btn = gr.Button("Clear", visible=live)
                 transcribe_btn = gr.Button("Start inference", visible=not live, variant='primary')
@@ -221,7 +223,7 @@ if __name__ == '__main__':
 
         # async transcription 
         transcribe_btn.click(
-            wrapper, 
+            inference_wrapper, 
             inputs=[audio_file, additional_prompt, language, task, temperature, repetition_penalty, num_beams, do_sample], 
             outputs=[prediction, timestamps, processing_times, correction],
             api_name='predict',
@@ -231,7 +233,7 @@ if __name__ == '__main__':
 
         # sync (live) transcription starts automatically  
         audio_file.stream(
-            live_wrapper,
+            live_inference_wrapper,
             inputs=[audio_file, state], 
             outputs=[prediction, state],
             api_name='live_predict' 
