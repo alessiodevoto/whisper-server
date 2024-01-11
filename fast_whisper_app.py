@@ -202,7 +202,7 @@ if __name__ == '__main__':
                 additional_prompt = gr.Textbox(visible=not live, label='custom prompt')
                 do_sample = gr.Checkbox(value=True, label='sample')
                 temperature = gr.Slider(minimum=0.1, maximum=2, value=0.1, label='temperature')
-                repetition_penalty = gr.Slider(minimum=0.0, maximum=1.0, value=1.0, label='repetition penalty')
+                repetition_penalty = gr.Slider(minimum=0.0, maximum=1.0, value=0.0, label='repetition penalty')
                 num_beams = gr.Slider(minimum=1, maximum=max_beam_size[args.model_size], step=1, value=1, label='number of beams')
                 clear_btn = gr.Button("Clear", visible=live)
                 transcribe_btn = gr.Button("Start inference", visible=not live, variant='primary')
