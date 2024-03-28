@@ -16,7 +16,7 @@ import datetime
 #####################################################################################################################################
 
 # Paths.
-workspace_dir = Path('/workspace')
+workspace_dir = Path('./')
 default_logs_dir = workspace_dir / 'logs/'
 default_models_dir = workspace_dir / 'models/'
 server_crash_log = workspace_dir / 'server_crashes_log.txt'
@@ -44,8 +44,6 @@ max_beam_size = {
 SUPPORTED_LANGUAGES = ['Afrikaans', 'Arabic', 'Armenian', 'Azerbaijani', 'Belarusian', 'Bosnian', 'Bulgarian', 'Catalan', 'Chinese', 'Croatian', 'Czech', 'Danish', 'Dutch', 'English', 'Estonian', 'Finnish', 'French', 'Galician', 'German', 'Greek', 'Hebrew', 'Hindi', 'Hungarian', 'Icelandic', 'Indonesian', 'Italian', 'Japanese', 'Kannada', 'Kazakh', 'Korean', 'Latvian', 'Lithuanian', 'Macedonian', 'Malay', 'Marathi', 'Maori', 'Nepali', 'Norwegian', 'Persian', 'Polish', 'Portuguese', 'Romanian', 'Russian', 'Serbian', 'Slovak', 'Slovenian', 'Spanish', 'Swahili', 'Swedish', 'Tagalog', 'Tamil', 'Thai', 'Turkish', 'Ukrainian', 'Urdu', 'Vietnamese', 'Welsh']
 
 
-
-             
 if __name__ == '__main__':
 
     # Parse args.
@@ -79,7 +77,7 @@ if __name__ == '__main__':
     os.environ['HF_HUB_CACHE'] = str(default_models_dir)
     os.environ['TRANSFORMERS_CACHE'] = str(default_models_dir)
     server_port = args.port
-    whisper_path = whisper_path.format(whisper_size=args.model_size)
+    whisper_path =  whisper_path.format(whisper_size=args.model_size)
 
 
     logger.info("*** Speech to Text application ***")
@@ -95,7 +93,13 @@ if __name__ == '__main__':
         hf_token=hf_token,
         chunk_len=args.chunk_len,
     )
-  
+    
+    from diarizer_inference import PyannoteDiarizer
+    diarizer = PyannoteDiarizer(logger = logger, 
+                                accelerator_device_id = 'cpu', 
+                                diarizer_model_path = "pyannote/speaker-diarization@2.1",
+                                hf_token = hf_token)
+
     
     # load markdown file with service description
     service_description = None
@@ -131,7 +135,8 @@ if __name__ == '__main__':
               temperature, 
               repetition_penalty, 
               num_beams,
-              do_sample):
+              do_sample,
+              do_diarization,):
             """
             Wrapper function for the fast_whisper_app module.
 
@@ -143,13 +148,13 @@ if __name__ == '__main__':
                 temperature (float): Temperature value for sampling from the model.
                 repetition_penalty (float): Repetition penalty value for the model.
                 num_beams (int): Number of beams for beam search decoding.
-
+                
             Returns:
-                tuple: A tuple containing the transcription, nice timestamps, processing times, and transcription again.
+                tuple: A tuple containing the transcription, nice timestamps, processing times, transcription again and diarization.
             """
             # inverse map the repetition penalty to go from 1 to 0.5
             repetition_penalty = 1 - repetition_penalty * 0.5
-            transcription, nice_timestamps, processing_times, transcription = None, None, None, None
+            transcription, nice_timestamps, processing_times, transcription, diarization = None, None, None, None, None
             try:
                 transcription, timestamps, processing_times = inference.generate(
                     audio_inp, 
@@ -159,10 +164,18 @@ if __name__ == '__main__':
                     temperature,
                     repetition_penalty,
                     num_beams,
-                    do_sample
+                    do_sample,
                     )
+                
+
+                diarization_result = None
+                if do_diarization:
+                    diarization_result = diarizer.generate(audio_inp = audio_inp)
+
                 nice_timestamps = json.dumps(format_timestamps(timestamps, last_ts=0.0)) if timestamps else None
                 processing_times = json.dumps(processing_times) if processing_times else None
+                diarization = json.dumps(diarization_result) if do_diarization else None
+
             except RuntimeError as e:
                 if 'out of memory' in str(e):
                         gr.Warning('''Out of Memory Error. This can be due to memory consuming settings for inference (e.g. too large number of beams) 
@@ -174,7 +187,7 @@ if __name__ == '__main__':
                 else:
                     raise 
             
-            return transcription, nice_timestamps, processing_times, transcription
+            return transcription, nice_timestamps, processing_times, transcription, diarization
 
 
     # Gradio interface
@@ -201,6 +214,7 @@ if __name__ == '__main__':
                 task = gr.Radio(choices=['transcribe', 'translate'], value='transcribe', label='task')
                 additional_prompt = gr.Textbox(visible=not live, label='custom prompt')
                 do_sample = gr.Checkbox(value=True, label='sample')
+                do_diarization = gr.Checkbox(value = True, label = "Diarization")
                 temperature = gr.Slider(minimum=0.1, maximum=2, value=0.1, label='temperature')
                 repetition_penalty = gr.Slider(minimum=0.0, maximum=1.0, value=0.0, label='repetition penalty')
                 num_beams = gr.Slider(minimum=1, maximum=max_beam_size[args.model_size], step=1, value=1, label='number of beams')
@@ -212,7 +226,8 @@ if __name__ == '__main__':
                 legacy_format = gr.JSON(label='legacy_format', visible=False)
                 timestamps = gr.JSON(label='Timestamps')
                 processing_times = gr.JSON(label='Processing times') 
-
+                diarization = gr.JSON(label="diarization")
+                
                 with gr.Accordion("Correct", open=False, visible=args.enable_corrections and not live):
                     correction = gr.Textbox(label='Correction', lines=10, interactive=True)
                     correct_btn = gr.Button("Correct")
@@ -224,8 +239,8 @@ if __name__ == '__main__':
         # async transcription 
         transcribe_btn.click(
             inference_wrapper, 
-            inputs=[audio_file, additional_prompt, language, task, temperature, repetition_penalty, num_beams, do_sample], 
-            outputs=[prediction, timestamps, processing_times, correction],
+            inputs=[audio_file, additional_prompt, language, task, temperature, repetition_penalty, num_beams, do_sample, do_diarization], 
+            outputs=[prediction, timestamps, processing_times, correction, diarization],
             api_name='predict',
             queue=True
             )
