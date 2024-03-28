@@ -49,7 +49,8 @@ if __name__ == '__main__':
     # Parse args.
     parser = argparse.ArgumentParser()
     parser.add_argument('--port', type=int, default=4020, help='port to run the server on')
-    parser.add_argument('--gpu_index', type=int, default=0, help='GPU index to use')
+    parser.add_argument('--whisper_gpu_index', type=int, default=0, help='GPU index for Whisper')
+    parser.add_argument('--diarizer_gpu_index', type=int, default=1, help = "GPU index for the diarization model (needs to differ from the Whisper GPU index)")
     parser.add_argument('--max_threads', type=int, default=40, help='max threads to use for a single request')
     parser.add_argument('--logs_dir', type=str, default=default_logs_dir, help='path directory to save logs')
     parser.add_argument('--enable_corrections', action='store_true', help='enable flagging, i.e. correction of transcriptions')
@@ -66,6 +67,9 @@ if __name__ == '__main__':
 
     if args.live:
         raise NotImplementedError("Live mode is not supported yet.")
+    
+    if args.whisper_gpu_index == args.diarizer_gpu_index:
+         raise ValueError("Whisper GPU index has to be different from the diarizer GPU index.")
 
     # Default logging configuration.
     logger = make_logger(args.logs_dir, args.verbose) 
@@ -87,7 +91,7 @@ if __name__ == '__main__':
     from fast_whisper_pipeline_inference import WhisperInference
     inference = WhisperInference(
         logger=logger,
-        cuda_device_index=args.gpu_index, 
+        cuda_device_index=args.whisper_gpu_index, 
         model_path=whisper_path,
         batch_size=args.batch_size,
         hf_token=hf_token,
@@ -96,7 +100,7 @@ if __name__ == '__main__':
     
     from diarizer_inference import PyannoteDiarizer
     diarizer = PyannoteDiarizer(logger = logger, 
-                                accelerator_device_id = 'cpu', 
+                                accelerator_device_id = args.diarizer_gpu_index,
                                 diarizer_model_path = "pyannote/speaker-diarization@2.1",
                                 hf_token = hf_token)
 

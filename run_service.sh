@@ -6,7 +6,8 @@
 
 # Set default values
 PORT=4020
-GPU_INDEX=0
+WHISPER_GPU_INDEX=0
+DIARIZER_GPU_INDEX=1
 MAX_THREADS=40
 LOGS_DIR="default_logs_dir"
 ENABLE_CORRECTIONS=""
@@ -31,8 +32,12 @@ while [[ $# -gt 0 ]]; do
             IMAGE_NAME=$2
             shift
             ;;
-        --gpu_index)
-            GPU_INDEX=$2
+        --whisper_gpu_index)
+            WHISPER_GPU_INDEX=$2
+            shift
+            ;;
+        --diarizer_gpu_index)
+            DIARIZER_GPU_INDEX=$2
             shift
             ;;
         --max_threads)
@@ -85,8 +90,8 @@ while [[ $# -gt 0 ]]; do
 done
 
 # Run the Python script with the parsed arguments
-echo "Service will be up in roughly 30 seconds on --port $PORT --gpu_index $GPU_INDEX --model_size $MODEL_SIZE $ONLINE $ENABLE_CORRECTIONS $VERBOSE"
+echo "Service will be up in roughly 30 seconds on --port $PORT --whisper_gpu_index $WHISPER_GPU_INDEX --diarizer_gpu_index $DIARIZER_GPU_INDEX --model_size $MODEL_SIZE $ONLINE $ENABLE_CORRECTIONS $VERBOSE"
 
 script_command="bash /workspace/whisper-server/fast_whisper_server.sh"
 start_time=$(date +'%m-%d-%Y-%H-%M-%S')
-docker run --name "whisper-service_$start_time" -p $PORT:$PORT --gpus all -dit $IMAGE_NAME $script_command "--port $PORT --gpu_index $GPU_INDEX --model_size $MODEL_SIZE $ONLINE $ENABLE_CORRECTIONS $VERBOSE"
+docker run --name "whisper-service_$start_time" -p $PORT:$PORT --gpus all -dit $IMAGE_NAME $script_command "--port $PORT --whisper_gpu_index $WHISPER_GPU_INDEX --model_size $MODEL_SIZE --diarizer_gpu_index $DIARIZER_GPU_INDEX $ONLINE $ENABLE_CORRECTIONS $VERBOSE"
